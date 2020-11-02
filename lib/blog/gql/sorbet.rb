@@ -7,6 +7,8 @@ require_relative "sorbet/version"
 module Domain; end
 module Api; end
 
+require_relative "graphql_api_delegation"
+
 class Domain::Message
   extend(T::Sig)
 
@@ -45,8 +47,34 @@ class Api::QueryRoot < GraphQL::Schema::Object
 end
 
 class Api::Message < GraphQL::Schema::Object
+  using(Api::GraphQLDelegation)
+
   field(:content, String, null: false)
   field(:from_name, String, null: true)
+
+  module Resolvers
+    class << self
+      extend(T::Sig)
+
+      sig do
+        params(object: Domain::Message, _: BasicObject)
+          .returns(String)
+      end
+      def content(object, *_)
+        object.content
+      end
+
+      sig do
+        params(object: Domain::Message, _: BasicObject)
+          .returns(T.nilable(String))
+      end
+      def from_name(object, *_)
+        object.from_name
+      end
+    end
+  end
+
+  delegate_to(Resolvers, methods: [:content, :from_name])
 end
 
 class Api::MessageInput < GraphQL::Schema::InputObject
@@ -88,4 +116,3 @@ class Api::Schema < GraphQL::Schema
   query(Api::QueryRoot)
   mutation(Api::MutationRoot)
 end
-
