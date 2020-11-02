@@ -54,6 +54,26 @@ class Api::MessageInput < GraphQL::Schema::InputObject
 
   argument(:content, String, required: true)
   argument(:from_name, String, required: false)
+
+  sig { returns(Domain::Message) }
+  def prepare
+    Domain::Message.new(
+      content: content,
+      from_name: from_name,
+    )
+  end
+
+  private
+
+  sig { returns(String) }
+  def content
+    self[:content]
+  end
+
+  sig { returns(T.nilable(String)) }
+  def from_name
+    self[:from_name]
+  end
 end
 
 class Api::MutationRoot < GraphQL::Schema::Object
