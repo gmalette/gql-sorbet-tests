@@ -52,12 +52,14 @@ class Api::Message < GraphQL::Schema::Object
   field(:content, String, null: false)
   field(:from_name, String, null: true)
 
+  ObjectType = T.type_alias { Domain::Message }
+
   module Resolvers
     class << self
       extend(T::Sig)
 
       sig do
-        params(object: Domain::Message, _: BasicObject)
+        params(object: ObjectType, _: BasicObject)
           .returns(String)
       end
       def content(object, *_)
@@ -65,7 +67,7 @@ class Api::Message < GraphQL::Schema::Object
       end
 
       sig do
-        params(object: Domain::Message, _: BasicObject)
+        params(object: ObjectType, _: BasicObject)
           .returns(T.nilable(String))
       end
       def from_name(object, *_)
@@ -83,7 +85,9 @@ class Api::MessageInput < GraphQL::Schema::InputObject
   argument(:content, String, required: true)
   argument(:from_name, String, required: false)
 
-  sig { returns(Domain::Message) }
+  PrepareType = T.type_alias { Domain::Message }
+
+  sig { returns(PrepareType) }
   def prepare
     Domain::Message.new(
       content: content,
@@ -120,8 +124,8 @@ class Api::MutationRoot < GraphQL::Schema::Object
         params(
           _obj: BasicObject,
           _context: BasicObject,
-          message_input: Domain::Message,
-        ).returns(Domain::Message)
+          message_input: Api::MessageInput::PrepareType,
+        ).returns(Api::Message::ObjectType)
       end
       def message_create(_obj, _context, message_input:)
         Domain::Message.create(message_input)
