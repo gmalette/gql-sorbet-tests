@@ -12,13 +12,26 @@ require_relative "graphql_api_delegation"
 class Domain::Message
   extend(T::Sig)
 
+  class Pending; end
+  @buffer = T.let([], T::Array[Domain::Message])
+
   sig do
     params(message: Domain::Message)
-      .returns(Domain::Message)
+      .returns(T.any(Domain::Message, Pending))
   end
   def self.create(message)
-    # omitted
-    message
+    if overwhelmed?
+      @buffer.push(message)
+      Pending.new
+    else
+      # omitted
+      message
+    end
+  end
+
+  sig { returns(T::Boolean) }
+  def self.overwhelmed?
+    false
   end
 
   sig do
