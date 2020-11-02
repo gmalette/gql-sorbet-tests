@@ -80,3 +80,21 @@ RSpec.describe("Api::Message") do
     end
   end
 end
+
+RSpec.describe("Api::MutationRoot") do
+  describe("#message_create") do
+    it("calls Domain::Message with the message") do
+      message =
+        Domain::Message.new(
+          content: "Hello Joe",
+          from_name: "Guillaume",
+        )
+
+      expect(Domain::Message)
+        .to(receive(:create).with(message).and_return(message))
+
+      Api::MutationRoot::Resolvers
+        .message_create(nil, nil, message_input: message)
+    end
+  end
+end

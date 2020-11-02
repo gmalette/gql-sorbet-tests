@@ -106,10 +106,30 @@ end
 
 class Api::MutationRoot < GraphQL::Schema::Object
   extend(T::Sig)
+  using(Api::GraphQLDelegation)
 
   field(:message_create, Api::Message, null: false) do |f|
     f.argument(:message_input, Api::MessageInput, required: true)
   end
+
+  module Resolvers
+    class << self
+      extend(T::Sig)
+
+      sig do
+        params(
+          _obj: BasicObject,
+          _context: BasicObject,
+          message_input: Domain::Message,
+        ).returns(Domain::Message)
+      end
+      def message_create(_obj, _context, message_input:)
+        Domain::Message.create(message_input)
+      end
+    end
+  end
+
+  delegate_to(Resolvers, methods: [:message_create])
 end
 
 class Api::Schema < GraphQL::Schema
