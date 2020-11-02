@@ -91,6 +91,30 @@ class Api::Message < GraphQL::Schema::Object
   delegate_to(Resolvers, methods: [:content, :from_name])
 end
 
+class Api::MessagePending < GraphQL::Schema::Object
+  using(Api::GraphQLDelegation)
+
+  field(:_singleton_value, GraphQL::Types::Boolean, null: false)
+
+  ObjectType = T.type_alias { Domain::Message::Pending }
+
+  module Resolvers
+    class << self
+      extend(T::Sig)
+
+      sig do
+        params(object: ObjectType, _: BasicObject)
+          .returns(T::Boolean)
+      end
+      def _singleton_value(object, *_)
+        true
+      end
+    end
+  end
+
+  delegate_to(Resolvers, methods: [:_singleton_value])
+end
+
 class Api::MessageInput < GraphQL::Schema::InputObject
   extend(T::Sig)
 
@@ -120,6 +144,35 @@ class Api::MessageInput < GraphQL::Schema::InputObject
   end
 end
 
+class Api::MessageCreateResult < GraphQL::Schema::Union
+  extend(T::Sig)
+
+  possible_types(Api::Message, Api::MessagePending)
+
+  ObjectType =
+    T.type_alias do
+      T.any(Api::Message::ObjectType, Api::MessagePending::ObjectType)
+    end
+
+  sig do
+    params(object: ObjectType, _: BasicObject)
+      .returns(T.any(
+        [T.class_of(Api::Message), Api::Message::ObjectType],
+        [T.class_of(Api::MessagePending), Api::MessagePending::ObjectType],
+      ))
+  end
+  def self.resolve_type(object, *_)
+    case object
+    when Domain::Message
+      [Api::Message, object]
+    when Domain::Message::Pending
+      [Api::MessagePending, object]
+    else
+      T.absurd(object)
+    end
+  end
+end
+
 class Api::MutationRoot < GraphQL::Schema::Object
   extend(T::Sig)
   using(Api::GraphQLDelegation)
@@ -137,7 +190,7 @@ class Api::MutationRoot < GraphQL::Schema::Object
           _obj: BasicObject,
           _context: BasicObject,
           message_input: Api::MessageInput::PrepareType,
-        ).returns(Api::Message::ObjectType)
+        ).returns(Api::MessageCreateResult::ObjectType)
       end
       def message_create(_obj, _context, message_input:)
         Domain::Message.create(message_input)
