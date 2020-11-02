@@ -85,11 +85,14 @@ class Api::MessageInput < GraphQL::Schema::InputObject
   argument(:content, String, required: true)
   argument(:from_name, String, required: false)
 
-  PrepareType = T.type_alias { Integer }
+  PrepareType = T.type_alias { Domain::Message }
 
   sig { returns(PrepareType) }
   def prepare
-    1
+    Domain::Message.new(
+      content: content,
+      from_name: from_name,
+    )
   end
 
   private
