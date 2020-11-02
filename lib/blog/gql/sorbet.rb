@@ -21,9 +21,8 @@ class Domain::Message
     message
   end
 
-  # Messages will be anonymous if from_name == nil
   sig do
-    params(content: String, from_name: T.nilable(String))
+    params(content: String, from_name: String)
       .void
   end
   def initialize(content:, from_name:)
@@ -34,7 +33,7 @@ class Domain::Message
   sig { returns(String) }
   attr_reader(:content)
 
-  sig { returns(T.nilable(String)) }
+  sig { returns(String) }
   attr_reader(:from_name)
 end
 
