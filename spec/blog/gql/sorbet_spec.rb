@@ -20,25 +20,6 @@ RSpec.describe("Api::MessageInput") do
       expect(message.content).to(eq("Hello Joe"))
       expect(message.from_name).to(eq("Guillaume"))
     end
-
-    it("can map to a Domain::Message with a nil from_name") do
-      input =
-        Api::MessageInput.new(
-          nil,
-          ruby_kwargs: {
-            content: "Hello Joe",
-            from_name: nil,
-          },
-          context: nil,
-          defaults_used: Set.new,
-        )
-
-      message = input.prepare
-
-      expect(message).to(be_kind_of(Domain::Message))
-      expect(message.content).to(eq("Hello Joe"))
-      expect(message.from_name).to(be_nil)
-    end
   end
 end
 
@@ -53,17 +34,6 @@ RSpec.describe("Api::Message") do
 
       expect(Api::Message::Resolvers.from_name(message))
         .to(eq("Guillaume"))
-    end
-
-    it("can be nil") do
-      message =
-        Domain::Message.new(
-          content: "Hello Joe",
-          from_name: nil,
-        )
-
-      expect(Api::Message::Resolvers.from_name(message))
-        .to(be_nil)
     end
   end
 

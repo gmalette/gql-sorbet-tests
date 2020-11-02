@@ -82,7 +82,7 @@ class Api::MessageInput < GraphQL::Schema::InputObject
   extend(T::Sig)
 
   argument(:content, String, required: true)
-  argument(:from_name, String, required: false)
+  argument(:from_name, String, required: true)
 
   PrepareType = T.type_alias { Domain::Message }
 
@@ -101,7 +101,7 @@ class Api::MessageInput < GraphQL::Schema::InputObject
     self[:content]
   end
 
-  sig { returns(T.nilable(String)) }
+  sig { returns(String) }
   def from_name
     self[:from_name]
   end
