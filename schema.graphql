@@ -1,0 +1,22 @@
+schema {
+  query: QueryRoot
+  mutation: MutationRoot
+}
+
+type Message {
+  content: String!
+  fromName: String!
+}
+
+input MessageInput {
+  content: String!
+  fromName: String!
+}
+
+type MutationRoot {
+  messageCreate(messageInput: MessageInput!): String!
+}
+
+type QueryRoot {
+  messages: [Message!]!
+}
