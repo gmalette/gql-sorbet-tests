@@ -88,7 +88,12 @@ class Api::Message < GraphQL::Schema::Object
     end
   end
 
-  delegate_to(Resolvers, methods: [:content, :from_name])
+  def content
+    puts self.inspect
+    "content"
+  end
+
+  delegate_to(Resolvers, methods: [:from_name])
 end
 
 class Api::MessagePending < GraphQL::Schema::Object

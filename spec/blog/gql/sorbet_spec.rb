@@ -68,3 +68,21 @@ RSpec.describe("Api::MutationRoot") do
     end
   end
 end
+
+RSpec.describe("Integration test") do
+  it("works") do
+    query_string = <<-GRAPHQL
+      mutation($message: MessageInput!){
+        messageCreate(messageInput: $message) {
+          __typename
+          content
+          fromName
+        }
+      }
+    GRAPHQL
+
+    result = Api::Schema.execute(query_string, variables: { message: { content: "Foo", fromName: "Guillaume" }})
+
+    puts result.inspect
+  end
+end
